@@ -29,10 +29,10 @@ License=GPL 2.0
 Description=A wrapper class for the liblinear classifier. Rong-En Fan, Kai-Wei Chang, Cho-Jui Hsieh, Xiang-Rui Wang, Chih-Jen Lin (2008). LIBLINEAR - A Library for Large Linear Classification.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/LibLINEAR1.0.0.zip?download
+PackageURL=https://github.com/downloads/bwaldvogel/liblinear-weka/LibLINEAR-1.8.0.zip
 
 # URL for further information
-URL=http://github.com/bwaldvogel/liblinear-java
+URL=http://github.com/bwaldvogel/liblinear-weka
 
 # Related to other packages?
 Related=LibSVM
