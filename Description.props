@@ -9,7 +9,7 @@ PackageName=LibLINEAR
 Version=1.8.0
 
 #Date
-Date=2011-06-02
+Date=2013-02-09
 
 # Title (required)
 Title=A wrapper class for the liblinear classifier
@@ -23,7 +23,7 @@ Author=Benedikt Waldvogel <mail@bwaldvogel.de>
 Maintainer=Benedikt Waldvogel <mail@bwaldvogel.de>
 
 # License (required)
-License=GPL 2.0
+License=BSD
 
 # Description (required)
 Description=A wrapper class for the liblinear classifier. Rong-En Fan, Kai-Wei Chang, Cho-Jui Hsieh, Xiang-Rui Wang, Chih-Jen Lin (2008). LIBLINEAR - A Library for Large Linear Classification.
