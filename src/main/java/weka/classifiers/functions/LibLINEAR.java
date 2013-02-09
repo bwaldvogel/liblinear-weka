@@ -89,11 +89,19 @@ import de.bwaldvogel.liblinear.SolverType;
  *
  * <pre> -S &lt;int&gt;
  *  Set type of solver (default: 1)
- *    0 = L2-regularized logistic regression
- *    1 = L2-loss support vector machines (dual)
- *    2 = L2-loss support vector machines (primal)
- *    3 = L1-loss support vector machines (dual)
- *    4 = multi-class support vector machines by Crammer and Singer</pre>
+ *   for multi-class classification
+ *     0 -- L2-regularized logistic regression (primal)
+ *     1 -- L2-regularized L2-loss support vector classification (dual)
+ *     2 -- L2-regularized L2-loss support vector classification (primal)
+ *     3 -- L2-regularized L1-loss support vector classification (dual)
+ *     4 -- support vector classification by Crammer and Singer
+ *     5 -- L1-regularized L2-loss support vector classification
+ *     6 -- L1-regularized logistic regression
+ *     7 -- L2-regularized logistic regression (dual)
+ *  for regression
+ *    11 -- L2-regularized L2-loss support vector regression (primal)
+ *    12 -- L2-regularized L2-loss support vector regression (dual)
+ *    13 -- L2-regularized L1-loss support vector regression (dual)</pre>
  *
  * <pre> -C &lt;double&gt;
  *  Set the cost parameter C
@@ -130,11 +138,11 @@ import de.bwaldvogel.liblinear.SolverType;
  <!-- options-end -->
  *
  * @author  Benedikt Waldvogel (mail at bwaldvogel.de)
- * @version 1.91
+ * @version 1.9.0
  */
 public class LibLINEAR extends AbstractClassifier implements TechnicalInformationHandler {
 
-    public static final String  REVISION         = "1.91";
+    public static final String  REVISION         = "1.9.0";
 
     /** serial UID */
     protected static final long serialVersionUID = 230504711;
@@ -154,14 +162,17 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
     protected boolean              m_Normalize            = false;
 
     /** SVM solver types */
-    public static final Tag[]      TAGS_SVMTYPE           = {new Tag(SolverType.L2R_LR.ordinal(), "L2-regularized logistic regression"),
-            new Tag(SolverType.L2R_L2LOSS_SVC_DUAL.getId(), "L2-loss support vector machines (dual)"),
-            new Tag(SolverType.L2R_L2LOSS_SVC.getId(), "L2-loss support vector machines (primal)"),
-            new Tag(SolverType.L2R_L1LOSS_SVC_DUAL.getId(), "L1-loss support vector machines (dual)"),
-            new Tag(SolverType.MCSVM_CS.getId(), "multi-class support vector machines by Crammer and Singer"),
+    public static final Tag[]      TAGS_SVMTYPE           = {new Tag(SolverType.L2R_LR.ordinal(), "L2-regularized logistic regression (primal)"),
+            new Tag(SolverType.L2R_L2LOSS_SVC_DUAL.getId(), "L2-regularized L2-loss support vector classification (dual)"),
+            new Tag(SolverType.L2R_L2LOSS_SVC.getId(), "L2-regularized L2-loss support vector classification (primal)"),
+            new Tag(SolverType.L2R_L1LOSS_SVC_DUAL.getId(), "L2-regularized L1-loss support vector classification (dual)"),
+            new Tag(SolverType.MCSVM_CS.getId(), "support vector classification by Crammer and Singer"),
             new Tag(SolverType.L1R_L2LOSS_SVC.getId(), "L1-regularized L2-loss support vector classification"),
             new Tag(SolverType.L1R_LR.getId(), "L1-regularized logistic regression"),
-            new Tag(SolverType.L2R_LR_DUAL.getId(), "L2-regularized logistic regression (dual)")};
+            new Tag(SolverType.L2R_LR_DUAL.getId(), "L2-regularized logistic regression (dual)"),
+            new Tag(SolverType.L2R_L2LOSS_SVR.getId(), "L2-regularized L2-loss support vector regression (primal)"),
+            new Tag(SolverType.L2R_L2LOSS_SVR_DUAL.getId(), "L2-regularized L2-loss support vector regression (dual)"),
+            new Tag(SolverType.L2R_L1LOSS_SVR_DUAL.getId(), "L2-regularized L1-loss support vector regression (dual)")};
 
     protected final SolverType     DEFAULT_SOLVER         = SolverType.L2R_L2LOSS_SVC_DUAL;
 
@@ -238,14 +249,19 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
         Vector<Object> result = new Vector<Object>();
 
         result.addElement(new Option("\tSet type of solver (default: 1)\n" //
-            + "\t\t 0 = L2-regularized logistic regression\n" //
-            + "\t\t 1 = L2-loss support vector machines (dual)\n" //
-            + "\t\t 2 = L2-loss support vector machines (primal)\n" //
-            + "\t\t 3 = L1-loss support vector machines (dual)\n" //
-            + "\t\t 4 = multi-class support vector machines by Crammer and Singer\n" //
-            + "\t\t 5 = L1-regularized L2-loss support vector classification\n" //
-            + "\t\t 6 = L1-regularized logistic regression\n" //
-            + "\t\t 7 = L2-regularized logistic regression (dual)", //
+            + "\tfor multi-class classification\n" //
+            + "\t\t 0 -- L2-regularized logistic regression (primal)" //
+            + "\t\t 1 -- L2-regularized L2-loss support vector classification (dual)" //
+            + "\t\t 2 -- L2-regularized L2-loss support vector classification (primal)" //
+            + "\t\t 3 -- L2-regularized L1-loss support vector classification (dual)" //
+            + "\t\t 4 -- support vector classification by Crammer and Singer" //
+            + "\t\t 5 -- L1-regularized L2-loss support vector classification" //
+            + "\t\t 6 -- L1-regularized logistic regression" //
+            + "\t\t 7 -- L2-regularized logistic regression (dual)" //
+            + "\tfor regression" //
+            + "\t\t11 -- L2-regularized L2-loss support vector regression (primal)" //
+            + "\t\t12 -- L2-regularized L2-loss support vector regression (dual)" //
+            + "\t\t13 -- L2-regularized L1-loss support vector regression (dual)", //
             "S", 1, "-S <int>"));
 
         result.addElement(new Option("\tSet the cost parameter C\n" + "\t (default: 1)", "C", 1, "-C <double>"));
@@ -281,14 +297,19 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      *
      * <pre> -S &lt;int&gt;
      *  Set type of solver (default: 1)
-     *    0 = L2-regularized logistic regression
-     *    1 = L2-loss support vector machines (dual)
-     *    2 = L2-loss support vector machines (primal)
-     *    3 = L1-loss support vector machines (dual)
-     *    4 = multi-class support vector machines by Crammer and Singer
-     *    5 = L1-regularized L2-loss support vector classification
-     *    6 = L1-regularized logistic regression
-     *    7 = L2-regularized logistic regression (dual)</pre>
+     *   for multi-class classification
+     *     0 -- L2-regularized logistic regression (primal)
+     *     1 -- L2-regularized L2-loss support vector classification (dual)
+     *     2 -- L2-regularized L2-loss support vector classification (primal)
+     *     3 -- L2-regularized L1-loss support vector classification (dual)
+     *     4 -- support vector classification by Crammer and Singer
+     *     5 -- L1-regularized L2-loss support vector classification
+     *     6 -- L1-regularized logistic regression
+     *     7 -- L2-regularized logistic regression (dual)
+     *  for regression
+     *    11 -- L2-regularized L2-loss support vector regression (primal)
+     *    12 -- L2-regularized L2-loss support vector regression (dual)
+     *    13 -- L2-regularized L1-loss support vector regression (dual)</pre>
      *
      * <pre> -C &lt;double&gt;
      *  Set the cost parameter C
